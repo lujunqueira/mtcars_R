@@ -1,0 +1,266 @@
+---
+title: "mtcars_dataframe"
+format: html
+editor: visual
+---
+
+---
+ R has a built-in dataframe called mtcars which has names rows of make and models and specification for each vehicle. We will be using the mtcars for dataframe manipulation. Here's a description of each mtcars columnLinks to an external site.. Use the assigned variable name 'mtcars' in a R session to access the mtcars dataframe.
+---
+
+Load the built-in dataframe
+
+```{r}
+#Load the built-in dataframe
+data(mtcars)
+df <- mtcars
+
+str(df)
+names(df)
+```
+
+---
+ Sort the mtcars built-in dataframe by row names in ascending order, A-Z. Makes and model names have a space between them. Identify the fourth and fourth to the last make and model names. 
+---
+
+Sort Row names in ascending order, A-Z
+
+```{r}
+#Sort Row names in ascending order, A-Z
+car_names <- rownames(mtcars)
+order(car_names)
+ordered_car_names <- order(car_names)
+car_names[ordered_car_names]
+
+sorted_names <- car_names[ordered_car_names]
+sorted_names
+
+df_sorted <- mtcars[ordered_car_names, ]
+```
+
+Identify the fourth and fourth to the last make and model names
+
+```{r}
+#Identify the fourth and fourth to the last make and model names
+
+rownames(df_sorted)[4]
+rownames(df_sorted)[nrow(df_sorted) - 3]
+```
+
+---
+ Determine how many factor levels in cyl column which depicts vehicle cylinders in the engine.  Create separate dataframes for each cyl level and calculate the average mpg (miles per gallon) for that cyl level rounding to 2 decimal places.
+---
+
+Determine how many factor levels in cyl column
+
+```{r}
+#Determine how many factor levels in cyl column
+
+df$cyl <- factor(df$cyl)
+levels(df$cyl)
+```
+
+Create separate dataframes for each cyl leve
+
+```{r}
+#Create separate dataframes for each cyl level
+
+split_by_cyl <- split(df$mpg, df$cyl)
+split_by_cyl
+```
+
+Calculate the average mpg for each cyl level rounding to 2 decimal
+
+```{r}
+#Calculate the average mpg for each cyl level rounding to 2 decimal
+
+avg_mpg_by_cyl <- sapply(split_by_cyl, function(x) round(mean(x, na.rm = TRUE), 2))
+
+
+avg_mpg_by_cyl
+
+```
+
+---
+Determine how many factor levels are in transmission gear column.
+Which transmission gear has lowest average hp (horse power)? 
+How does the average cylinder count for each of each transmission gear level explain the average hp (horse power)?
+---
+
+Determine how many factor levels are in transmission gear column
+
+```{r}
+#Determine how many factor levels are in transmission gear column
+
+df$gear <- factor(df$gear)
+df$am   <- factor(df$am, levels = c(0, 1), labels = c("automatic", "manual"))
+
+levels(df$gear)
+length(levels(df$gear))
+
+levels(df$am)
+length(levels(df$am))
+```
+
+Which transmission gear has lowest average hp?
+
+```{r}
+#Which transmission gear has lowest average hp? 
+
+# Load df without factors
+data(mtcars)
+df <- mtcars
+
+# Create a numeric matrix
+hp_gear_am_matrix <- cbind(hp = df$hp, gear = df$gear, am = df$am)
+
+is.matrix(hp_gear_am_matrix)
+mode(hp_gear_am_matrix) 
+head(hp_gear_am_matrix)
+
+# Matrix back to a data frame
+df_mean_hp <- as.data.frame(hp_gear_am_matrix)
+
+# Mean horsepower by gear and am
+mean_hp_by_gear_am <- aggregate(hp ~ gear + am, data = df_mean_hp, FUN = mean)
+
+mean_hp_by_gear_am
+mean_hp_by_gear_am$hp
+
+# Lowest mean
+lowest_hp_row <- mean_hp_by_gear_am[which.min(mean_hp_by_gear_am$hp), ]
+lowest_hp_row
+
+lowest_hp_gear <- lowest_hp_row$gear
+lowest_hp_am   <- lowest_hp_row$am
+lowest_hp_value <- lowest_hp_row$hp
+```
+
+---
+How many transmission gears are represented by the factor levels in the automatic transmission (am) column?
+---
+
+Keep only automatic transmissions, create factor
+
+```{r}
+#Keep only automatic transmissions
+automatic_cars <- df[df$am == 0, ]
+
+#Create Factor
+automatic_cars$gear <- factor(automatic_cars$gear)
+
+levels(automatic_cars$gear)
+length(levels(automatic_cars$gear))
+
+the_number_of_transmission <- length(levels(automatic_cars$gear))
+```
+
+```{r}
+
+#Keep only manual transmissions
+manual_cars <- df[df$am == 1, ]
+
+#Create Factor
+manual_cars$gear <- factor(manual_cars$gear)
+
+levels(manual_cars$gear)
+length(levels(manual_cars$gear))
+
+the_number_of_transmission_manual <- length(levels(manual_cars$gear))
+```
+
+\
+
+---
+Create two new columns. Your company determined a way to calculate efficiency and you were asked if the efficiency rate is a good way to determine the best car.
+The efficiency algorithm you are asked to calculate for each make and modes is the horsepower (hp) per (divide) weight (wt) times (multiply) the miles per gallon (mpg) of each vehicle. 
+The efficiency rate is the efficiency column divided by the qsec column, which is the amount of time in seconds the vehicles takes to travel a quarter mile.
+Which make and model has the highest efficiency and efficiency rate? 
+Plot a scatter plot the two columns using the plot command in R and upload your image. Does the image show a clear winner?
+---
+
+Create a new column for efficiency
+
+```{r}
+data(mtcars)
+df <- mtcars
+
+#Create a new column for efficiency
+df$efficiency <- (df$hp / df$wt) * df$mpg
+head(df$efficiency)
+
+
+```
+
+Create a new column for efficiency rate
+
+```{r}
+#Create a new column for efficiency rate
+
+df$efficiency_rate <- df$efficiency / df$qsec
+
+head(df$efficiency_rate)
+```
+
+Which make and model has the highest efficiency and efficiency rate?
+
+```{r}
+#Which make and model has the highest efficiency?
+max_efficiency <- max(df$efficiency)
+highest_efficiency_row <- which.max(df$efficiency)
+highest_efficiency_car <- rownames(df)[highest_efficiency_row]
+
+highest_efficiency_car
+max_efficiency
+
+#Which make and model has the highest efficiency rate?
+max_efficiency_rate <- max(df$efficiency_rate)
+highest_efficiency_rate_row <- which.max(df$efficiency_rate)
+highest_efficiency_rate_car <- rownames(df)[highest_efficiency_rate_row]
+
+highest_efficiency_rate_car
+max_efficiency_rate
+
+```
+
+Plot a scatter plot using the two new columns and car names
+
+```{r}
+# create row for car name
+df$car <- rownames(df)
+head(df)
+
+# scatter plot
+plot(df$efficiency,
+     df$efficiency_rate,
+     main = "Efficiency vs Efficiency Rate",
+     xlab = "Efficiency",
+     ylab = "Efficiency Rate",
+     pch = 20,
+     col = "blue",
+     #add space for car name
+     xlim = c(0, max(df$efficiency) * 1.3),   
+     ylim = c(0, max(df$efficiency_rate) * 1.3))
+
+# label the top car
+points(df$efficiency[highest_efficiency_rate_row],
+       df$efficiency_rate[highest_efficiency_rate_row],
+       col = "darkgreen", pch = 20, cex = 1.5)
+
+text(df$efficiency[highest_efficiency_rate_row],
+     df$efficiency_rate[highest_efficiency_rate_row],
+     labels = highest_efficiency_rate_car,
+     pos = 4, col = "darkgreen", cex = 1)
+
+```
+
+Convert the file
+
+```{r}
+#Convet file
+knitr::purl("mtcars_dataframe.qmd", output = "mtcars_dataframe.R")
+
+getwd()
+```
+
+\
